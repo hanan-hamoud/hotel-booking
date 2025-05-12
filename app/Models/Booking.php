@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Booking extends Model
 {
-    use HasFactory;
+  
 
     protected $fillable = [
         'room_id',
@@ -19,11 +19,9 @@ class Booking extends Model
         'status',
     ];
 
-    protected $casts = [
-        'check_in_date' => 'date',
-        'check_out_date' => 'date',
-        'status' => BookingStatus::class,
-    ];
+protected $casts = [
+    'status' => status::class,
+];
 
     public function room()
     {

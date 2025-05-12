@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Room extends Model
 {
-    use HasFactory;
+ 
 
     protected $fillable = [
         'hotel_id',
@@ -17,9 +17,8 @@ class Room extends Model
     ];
 
     protected $casts = [
-        'room_type' => RoomType::class,    
-        'status' => RoomStatus::class,     
-        'price_per_night' => 'decimal:2',
+        'room_type' => RoomType::class,
+        'status' => RoomStatus::class,
     ];
 
     public function hotel()

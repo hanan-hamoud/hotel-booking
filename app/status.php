@@ -10,9 +10,9 @@ enum status: string {
     public function label(): string
     {
         return match($this) {
-            self::Confirmed => 'Confirmed Room',
-            self::Cancelled => 'Cancelled Room',
-            self::Completed  => 'Completed Room',
+            self::Confirmed => 'Confirmed',
+            self::Cancelled => 'Cancelled',
+            self::Completed => 'Completed',
         };
     }
 }

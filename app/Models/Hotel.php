@@ -17,6 +17,7 @@ class Hotel extends Model
     protected $casts = [
         'contact_info' => 'array',
     ];
+    
 
     public function rooms()
     {
