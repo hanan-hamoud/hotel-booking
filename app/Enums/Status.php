@@ -1,15 +1,16 @@
 <?php
 
-namespace App;
+namespace App\Enums;
 
-enum status: string {
+enum Status: string
+{
     case Confirmed = 'confirmed';
     case Cancelled = 'cancelled';
     case Completed = 'completed';
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::Confirmed => 'Confirmed',
             self::Cancelled => 'Cancelled',
             self::Completed => 'Completed',

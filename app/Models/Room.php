@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\RoomType;
+use App\Enums\RoomStatus;
 
 class Room extends Model
 {
