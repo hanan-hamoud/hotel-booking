@@ -4,7 +4,7 @@ const forms = require('@tailwindcss/forms');
 module.exports = {
   plugins: [
     tailwindcss(),
-    forms, // ✅ لا تستخدم () هنا
+    forms, 
     require('autoprefixer'),
   ],
 };

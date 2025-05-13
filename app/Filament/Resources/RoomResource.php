@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Enums\RoomType;
-use App\Enums\Status;
 use App\Models\Room;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -48,7 +47,7 @@ class RoomResource extends Resource
 
                 Forms\Components\Select::make('status')
                     ->options(
-                        collect(Status::cases())->mapWithKeys(fn($status) => [
+                        collect(RoomStatus::cases())->mapWithKeys(fn($status) => [
                             $status->value => $status->label(),
                         ])->toArray()
                     )
