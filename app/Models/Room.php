@@ -1,5 +1,6 @@
 <?php
 
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -8,8 +9,6 @@ use App\Enums\RoomStatus;
 
 class Room extends Model
 {
- 
-
     protected $fillable = [
         'hotel_id',
         'room_number',
@@ -23,6 +22,7 @@ class Room extends Model
         'status' => RoomStatus::class,
     ];
 
+    // ✅ العلاقة الصحيحة مع الفندق
     public function hotel()
     {
         return $this->belongsTo(Hotel::class);

@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Booking extends Model
 {
-  
-
     protected $fillable = [
         'room_id',
         'guest_name',
@@ -19,17 +17,26 @@ class Booking extends Model
         'status',
     ];
 
-protected $casts = [
-    'status' => status::class,
-];
+    protected $casts = [
+        'status' => Status::class, // تأكد من أن Enum موجود ومسماه صحيح
+    ];
 
     public function room()
     {
         return $this->belongsTo(Room::class);
     }
 
+    // ✅ طريقة آمنة للوصول إلى الفندق من خلال الغرفة
     public function hotel()
     {
-        return $this->room->hotel();
+        return optional($this->room)->hotel;
     }
+
+    // ✅ أو بدلاً من ذلك كـ Accessor
+    /*
+    public function getHotelAttribute()
+    {
+        return optional($this->room)->hotel;
+    }
+    */
 }
