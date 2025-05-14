@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\RoomType;
-use App\Enums\RoomStatus;
+use App\Filament\Resources\RoomResource\Pages;
+use App\Filament\Resources\RoomResource\RelationManagers;
 use App\Models\Room;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -11,7 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use App\Filament\Resources\RoomResource\Pages;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class RoomResource extends Resource
 {
@@ -23,37 +23,22 @@ class RoomResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('hotel_id')
-                    ->relationship('hotel', 'name') 
+                Forms\Components\TextInput::make('hotel_id')
+                    ->tel()
                     ->required()
-                    ->label('الفندق'),
-
+                    ->numeric(),
                 Forms\Components\TextInput::make('room_number')
                     ->required()
-                    ->label('رقم الغرفة'),
-
-                Forms\Components\Select::make('room_type')
-                    ->options(
-                        collect(RoomType::cases())->mapWithKeys(fn($type) => [
-                            $type->value => $type->label(),
-                        ])->toArray()
-                    )
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('room_type')
                     ->required()
-                    ->label('نوع الغرفة'),
-
+                    ->maxLength(255),
                 Forms\Components\TextInput::make('price_per_night')
-                    ->numeric()
                     ->required()
-                    ->label('السعر لكل ليلة'),
-
-                Forms\Components\Select::make('status')
-                    ->options(
-                        collect(RoomStatus::cases())->mapWithKeys(fn($status) => [
-                            $status->value => $status->label(),
-                        ])->toArray()
-                    )
+                    ->numeric(),
+                Forms\Components\TextInput::make('status')
                     ->required()
-                    ->label('الحالة'),
+                    ->maxLength(255),
             ]);
     }
 
@@ -61,46 +46,35 @@ class RoomResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('hotel_id')
+                    ->numeric()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('room_number')
-                    ->label('رقم الغرفة')
                     ->searchable(),
-
                 Tables\Columns\TextColumn::make('room_type')
-                    ->label('نوع الغرفة')
-                    ->formatStateUsing(fn($state) => RoomType::from($state)->label())
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('price_per_night')
-                    ->label('السعر')
-                    ->money('usd') 
-                    ->sortable(),
-
-                    Tables\Columns\TextColumn::make('room_type')
-                    ->label('نوع الغرفة')
-                    ->formatStateUsing(fn($state) => $state->label()) 
-                    ->sortable(),
-                
-                Tables\Columns\TextColumn::make('status')
-                    ->label('الحالة')
-                    ->formatStateUsing(fn($state) => $state->label()) 
-                    ->badge()
-                    ->colors([
-                        'primary' => 'confirmed',
-                        'danger' => 'cancelled',
-                        'success' => 'completed',
-                    ]),
-                
-
-                Tables\Columns\TextColumn::make('hotel.name')
-                    ->label('الفندق')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('price_per_night')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(), 
             ])
+           
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
@@ -111,7 +85,7 @@ class RoomResource extends Resource
     public static function getRelations(): array
     {
         return [
-            
+            //
         ];
     }
 
@@ -122,10 +96,5 @@ class RoomResource extends Resource
             'create' => Pages\CreateRoom::route('/create'),
             'edit' => Pages\EditRoom::route('/{record}/edit'),
         ];
-    }
-
-    public static function getNavigationLabel(): string
-    {
-        return __('الغرف');
     }
 }

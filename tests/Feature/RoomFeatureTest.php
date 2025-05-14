@@ -2,87 +2,118 @@
 
 namespace Tests\Feature;
 
+use Tests\TestCase;
+use App\Models\User;
 use App\Models\Hotel;
 use App\Models\Room;
 use App\Enums\RoomType;
 use App\Enums\RoomStatus;
+use Livewire\Livewire;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use App\Filament\Resources\RoomResource\Pages\ListRooms;
+use App\Filament\Resources\RoomResource\Pages\CreateRoom;
+use App\Filament\Resources\RoomResource\Pages\EditRoom;
 
 class RoomFeatureTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function user_can_create_room()
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $user = User::factory()->create();
+        $this->actingAs($user);
+    }
+
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function it_can_list_rooms()
+    {
+        $hotel = Hotel::factory()->create();
+        $rooms = Room::factory()->count(5)->create(['hotel_id' => $hotel->id]);
+
+        Livewire::test(ListRooms::class)
+            ->assertCanSeeTableRecords($rooms);
+    }
+
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function it_can_create_a_room()
     {
         $hotel = Hotel::factory()->create();
 
-        $response = $this->post('/admin/rooms', [
-            'hotel_id' => $hotel->id,
-            'room_number' => '101',
-            'room_type' => RoomType::Double->value,
-            'price_per_night' => 150.00,
-            'status' => RoomStatus::Available->value,
-        ]);
+        Livewire::test(CreateRoom::class)
+            ->fillForm([
+                'hotel_id' => $hotel->id,
+                'room_number' => '101',
+                'room_type' => RoomType::Suite->value,
+                'price_per_night' => 150.00,
+                'status' => RoomStatus::Available->value,
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
 
-        $response->assertStatus(201); 
         $this->assertDatabaseHas('rooms', [
-            'hotel_id' => $hotel->id,
             'room_number' => '101',
-            'room_type' => RoomType::Double->value,
-            'price_per_night' => 150.00,
+            'room_type' => RoomType::Suite->value,
             'status' => RoomStatus::Available->value,
         ]);
     }
 
-    /** @test */
-    public function user_can_view_room()
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function it_can_edit_a_room()
     {
-        $room = Room::factory()->create();
-
-        $response = $this->get('/admin/rooms/' . $room->id);
-
-        $response->assertStatus(200); 
-        $response->assertJson([
-            'room_number' => $room->room_number,
-            'room_type' => $room->room_type,
-            'status' => $room->status,
-        ]);
-    }
-
-    /** @test */
-    public function user_can_update_room()
-    {
-        $room = Room::factory()->create();
-
-        $response = $this->put('/admin/rooms/' . $room->id, [
-            'room_number' => '102',
-            'room_type' => RoomType::Suite->value,
-            'price_per_night' => 250.00,
-            'status' => RoomStatus::Booked->value,
+        $room = Room::factory()->create([
+            'room_type' => RoomType::Single,
+            'status' => RoomStatus::Available,
         ]);
 
-        $response->assertStatus(200); 
+        Livewire::test(EditRoom::class, [
+            'record' => $room->getKey(),
+        ])
+            ->fillForm([
+                'room_number' => '202',
+                'room_type' => RoomType::Double->value,
+                'price_per_night' => 250.00,
+                'status' => RoomStatus::Booked->value,
+                'hotel_id' => $room->hotel_id,
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
         $this->assertDatabaseHas('rooms', [
             'id' => $room->id,
-            'room_number' => '102',
-            'room_type' => RoomType::Suite->value,
-            'price_per_night' => 250.00,
+            'room_number' => '202',
+            'room_type' => RoomType::Double->value,
             'status' => RoomStatus::Booked->value,
         ]);
     }
 
-    /** @test */
-    public function user_can_delete_room()
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function it_can_delete_a_room()
     {
         $room = Room::factory()->create();
 
-        $response = $this->delete('/admin/rooms/' . $room->id);
+        Livewire::test(ListRooms::class)
+            ->callTableAction('delete', $room);
 
-        $response->assertStatus(200);
         $this->assertDatabaseMissing('rooms', [
             'id' => $room->id,
         ]);
     }
-}
 
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function it_fails_to_create_room_with_missing_required_fields()
+    {
+        $hotel = Hotel::factory()->create();
+
+        Livewire::test(CreateRoom::class)
+            ->fillForm([
+                'room_number' => '',
+                'room_type' => '',
+                'price_per_night' => '',
+                'status' => '',
+                'hotel_id' => '',
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['room_number', 'room_type', 'price_per_night', 'status', 'hotel_id']);
+    }
+}

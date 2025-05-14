@@ -16,4 +16,10 @@ class ListRooms extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+    protected function getTableActions(): array
+{
+    return [
+        DeleteAction::make(),
+    ];
+}
 }
