@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-
+use App\Enums\RoomStatus;
 use Illuminate\Database\Eloquent\Model;
 
 class Booking extends Model
@@ -18,7 +18,7 @@ class Booking extends Model
     ];
 
     protected $casts = [
-        'status' => Status::class, // تأكد من أن Enum موجود ومسماه صحيح
+        'status' => RoomStatus::class,
     ];
 
     public function room()
@@ -26,17 +26,10 @@ class Booking extends Model
         return $this->belongsTo(Room::class);
     }
 
-    // ✅ طريقة آمنة للوصول إلى الفندق من خلال الغرفة
     public function hotel()
     {
         return optional($this->room)->hotel;
     }
 
-    // ✅ أو بدلاً من ذلك كـ Accessor
-    /*
-    public function getHotelAttribute()
-    {
-        return optional($this->room)->hotel;
-    }
-    */
+  
 }

@@ -9,19 +9,32 @@ class RoomSearch extends Component
 {
     public $hotel, $roomType, $priceRange, $availabilityDate;
     public $rooms;
-
     public function search()
     {
-        $this->rooms = Room::query()
-            ->when($this->hotel, fn($q) => $q->whereHas('hotel', fn($q) => $q->where('name', 'like', "%{$this->hotel}%")))
-            ->when($this->roomType, fn($q) => $q->where('type', $this->roomType))
-            ->when($this->priceRange, function($q) {
-                [$min, $max] = explode('-', $this->priceRange);
-                return $q->whereBetween('price', [(float)$min, (float)$max]);
-            })
-            ->when($this->availabilityDate, fn($q) => $q->whereDate('available_from', '<=', $this->availabilityDate))
-            ->get();
+        $query = Room::query();
+    
+        if ($this->hotel) {
+            $query->whereHas('hotel', function ($query) {
+                $query->where('name', 'like', '%' . $this->hotel . '%');
+            });
+        }
+    
+        if ($this->roomType) {
+            $query->where('room_type', $this->roomType);
+        }
+    
+        if ($this->priceRange) {
+            list($minPrice, $maxPrice) = explode('-', $this->priceRange);
+            $query->whereBetween('price_per_night', [(float)$minPrice, (float)$maxPrice]);
+        }
+    
+        if ($this->availabilityDate) {
+            $query->whereDate('available_from', '>=', $this->availabilityDate);
+        }
+    
+        $this->rooms = $query->get();
     }
+    
 
     public function render()
     {

@@ -1,5 +1,5 @@
 <div>
-<!-- resources/views/livewire/room-search.blade.php -->
+<!--livewire/room-search.blade.php -->
 <div class="max-w-5xl mx-auto p-6 bg-white rounded shadow mt-10">
     <h2 class="text-2xl font-semibold mb-4">Search Available Rooms</h2>
 
@@ -46,12 +46,15 @@
                     <li class="p-4 border rounded shadow-sm">
                         <div class="flex justify-between items-center">
                             <div>
-                                <h4 class="font-bold">{{ $room->hotel->name }} - {{ $room->type }}</h4>
-                                <p class="text-sm text-gray-600">Price: ${{ $room->price }} | Available from: {{ $room->available_from }}</p>
+                                <h4 class="font-bold">{{ $room->hotel->name }} - {{ $room->room_type }}</h4>
+
+                                <p class="text-sm text-gray-600">Price: ${{ $room->price }} </p>
+                                {{-- | Available from: {{ $room->available_from }} --}}
                             </div>
                             <a href="{{ route('book-room', ['room' => $room->id]) }}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
                                 Book Now
                             </a>
+                            
                         </div>
                     </li>
                 @endforeach

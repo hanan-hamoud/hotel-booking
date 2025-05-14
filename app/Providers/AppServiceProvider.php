@@ -1,9 +1,10 @@
 <?php
 
 namespace App\Providers;
-
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
-
+use Livewire\Livewire;
+use App\Http\Livewire\BookRoomForm;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -17,8 +18,12 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
-    {
-        //
-    }
+   
+    
+  
+
+public function boot()
+{
+    Blade::componentNamespace('App\\View\\Components', 'layouts');
+}
 }

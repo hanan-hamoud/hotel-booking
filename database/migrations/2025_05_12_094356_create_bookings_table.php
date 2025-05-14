@@ -20,7 +20,7 @@ return new class extends Migration
             $table->date('check_in_date');
             $table->date('check_out_date');
             $table->text('special_request')->nullable();
-            $table->string('status');
+            $table->string('status')->default('available'); 
             $table->timestamps();
         });
         
