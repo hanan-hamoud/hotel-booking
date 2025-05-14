@@ -23,7 +23,30 @@ class BookingResource extends Resource
     {
         return $form
             ->schema([
-                //
+                Forms\Components\TextInput::make('room_id')
+                    ->required()
+                    ->numeric(),
+                Forms\Components\TextInput::make('guest_name')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('guest_email')
+                    ->email()
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('guest_phone')
+                    ->tel()
+                    ->maxLength(255)
+                    ->default(null),
+                Forms\Components\DatePicker::make('check_in_date')
+                    ->required(),
+                Forms\Components\DatePicker::make('check_out_date')
+                    ->required(),
+                Forms\Components\Textarea::make('special_request')
+                    ->columnSpanFull(),
+                Forms\Components\TextInput::make('status')
+                    ->required()
+                    ->maxLength(255)
+                    ->default('available'),
             ]);
     }
 
@@ -31,7 +54,31 @@ class BookingResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('room_id')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('guest_name')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('guest_email')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('guest_phone')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('check_in_date')
+                    ->date()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('check_out_date')
+                    ->date()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
@@ -60,10 +107,5 @@ class BookingResource extends Resource
             'create' => Pages\CreateBooking::route('/create'),
             'edit' => Pages\EditBooking::route('/{record}/edit'),
         ];
-    }
-
-    public static function getNavigationLabel(): string
-    {
-        return __('الحجوزات');  
     }
 }

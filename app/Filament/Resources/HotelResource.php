@@ -132,18 +132,14 @@ class HotelResource extends Resource
 
     public static function saving($record)
     {
-        // تحقق من وجود قيمة الهاتف والبريد الإلكتروني
         if ($record->phone && $record->email) {
-            // تحويل البيانات إلى JSON
             $contact_info = [
                 'phone' => $record->phone,
                 'email' => $record->email
             ];
     
-            // تخزينها في الحقل contact_info
             $record->contact_info = json_encode($contact_info);
     
-            // حذف البيانات الأصلية من الحقول phone و email بعد حفظها في contact_info
             $record->phone = null;
             $record->email = null;
         }

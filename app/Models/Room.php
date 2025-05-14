@@ -24,7 +24,6 @@ class Room extends Model
         'status' => RoomStatus::class,
     ];
 
-    // ✅ العلاقة الصحيحة مع الفندق
     public function hotel()
     {
         return $this->belongsTo(Hotel::class);

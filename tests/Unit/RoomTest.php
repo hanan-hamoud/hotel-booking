@@ -13,7 +13,6 @@ class RoomTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
     public function room_has_valid_attributes()
     {
         $hotel = Hotel::factory()->create(); 
