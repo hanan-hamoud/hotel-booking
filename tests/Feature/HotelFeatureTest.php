@@ -6,41 +6,136 @@ use Tests\TestCase;
 use App\Models\User;
 use App\Models\Hotel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
+use App\Filament\Resources\HotelResource\Pages\ListHotels;
+use App\Filament\Resources\HotelResource\Pages\CreateHotel;
 
 class HotelFeatureTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_hotel_creation_page_loads()
+    protected function setUp(): void
     {
-        $user = User::factory()->create();
+        parent::setUp();
 
+        $user = User::factory()->create(); // إذا كنت تستخدم تحقق من الصلاحيات
         $this->actingAs($user);
-
-        $response = $this->get('/admin/hotels/create');
-
-        $response->assertStatus(200);
-        $response->assertSee('إضافة فندق');
     }
 
-    public function test_user_can_create_a_hotel()
+    /** @test */
+    public function it_can_list_hotels()
     {
-        $user = User::factory()->create();
+        $hotels = Hotel::factory()->count(10)->create();
 
-        $this->actingAs($user);
+        Livewire::test(ListHotels::class)
+            ->assertCanSeeTableRecords($hotels);
+    }
 
-        $response = $this->post('/admin/hotels', [
-            'name' => 'New Hotel',
-            'location' => 'New Location',
-            'description' => 'This is a new hotel',
-            'number_of_rooms' => 50,
-            'phone' => '987654321',
-            'email' => 'newhotel@example.com',
-        ]);
-
-        $response->assertRedirect('/admin/hotels');
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function it_can_create_a_hotel()
+    {
+        $admin = User::factory()->create(); // تم حذف is_admin
+        $this->actingAs($admin);
+    
+        Livewire::test(\App\Filament\Resources\HotelResource\Pages\CreateHotel::class)
+            ->fillForm([
+                'name' => 'فندق النخبة',
+                'location' => 'صنعاء',
+                'description' => 'فندق خمس نجوم',
+                'number_of_rooms' => 100,
+                'contact_info' => [
+                    'phone' => '777777777',
+                    'email' => 'elite@hotel.com',
+                ],
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+    
         $this->assertDatabaseHas('hotels', [
-            'name' => 'New Hotel',
+            'name' => 'فندق النخبة',
+            'location' => 'صنعاء',
         ]);
     }
+    #[\PHPUnit\Framework\Attributes\Test]
+public function it_can_edit_a_hotel()
+{
+    $hotel = Hotel::factory()->create([
+        'name' => 'فندق قديم',
+        'location' => 'عدن',
+    ]);
+
+    Livewire::test(\App\Filament\Resources\HotelResource\Pages\EditHotel::class, [
+        'record' => $hotel->getKey(),
+    ])
+        ->fillForm([
+            'name' => 'فندق محدث',
+            'location' => 'صنعاء',
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $this->assertDatabaseHas('hotels', [
+        'id' => $hotel->id,
+        'name' => 'فندق محدث',
+        'location' => 'صنعاء',
+    ]);
+}
+
+
+#[\PHPUnit\Framework\Attributes\Test]
+public function it_can_delete_a_hotel()
+{
+    $hotel = Hotel::factory()->create();
+
+    Livewire::test(ListHotels::class)
+        ->callTableAction('delete', $hotel);
+
+    $this->assertDatabaseMissing('hotels', [
+        'id' => $hotel->id,
+    ]);
+}
+
+#[\PHPUnit\Framework\Attributes\Test]
+public function it_fails_to_create_hotel_with_missing_required_fields()
+{
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    Livewire::test(\App\Filament\Resources\HotelResource\Pages\CreateHotel::class)
+        ->fillForm([
+            'name' => '', // مفقود
+            'location' => '', // مفقود
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['name', 'location']);
+}
+   
+#[\PHPUnit\Framework\Attributes\Test]
+public function it_can_update_a_hotel()
+{
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    $hotel = Hotel::factory()->create();
+
+    Livewire::test(\App\Filament\Resources\HotelResource\Pages\EditHotel::class, [
+        'record' => $hotel->getRouteKey(),
+    ])
+        ->fillForm([
+            'name' => 'فندق التميز',
+            'location' => 'عدن',
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $this->assertDatabaseHas('hotels', [
+        'id' => $hotel->id,
+        'name' => 'فندق التميز',
+        'location' => 'عدن',
+    ]);
+}
+
+
+
+
 }
